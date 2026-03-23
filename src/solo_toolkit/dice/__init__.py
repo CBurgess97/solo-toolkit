@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -10,7 +10,6 @@ class RollGroup:
 
 @dataclass
 class DiceResult:
-    expression: str
     rolls: list[RollGroup]
-    modifiers: list[int]
     total: int
+    ops: list[str] = field(default_factory=list)

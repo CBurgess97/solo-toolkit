@@ -23,7 +23,7 @@ class ParseError(Exception):
 _PATTERN = re.compile(r"\s*(?:(\d+)|(d)|(\+)|(-))")
 
 
-def tokenize(expression: str):
+def tokenize(expression: str) -> list[Token]:
     tokens: list[Token] = []
     pos = 0
     while pos < len(expression):
