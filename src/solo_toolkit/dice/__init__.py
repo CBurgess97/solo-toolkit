@@ -12,4 +12,4 @@ class RollGroup:
 class DiceResult:
     rolls: list[RollGroup]
     total: int
-    ops: list[str] = field(default_factory=list)
+    parts: list[str] = field(default_factory=list)

@@ -2,6 +2,7 @@ import typer
 
 import solo_toolkit.dice.parser as parser
 import solo_toolkit.dice.roller as roller
+import solo_toolkit.dice.writer as writer
 
 app = typer.Typer()
 
@@ -9,5 +10,5 @@ app = typer.Typer()
 @app.command()
 def roll(expression: str):
     nodes = parser.parse(expression)
-    rolls = roller.evaluate(nodes)
-    print(rolls)
+    result = roller.evaluate(nodes)
+    print(writer.write(result))

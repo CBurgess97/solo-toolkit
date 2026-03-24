@@ -12,26 +12,30 @@ def evaluate(node: Node) -> DiceResult:
     match node:
         case Dice(count, sides):
             group = _roll(count, sides)
-            result = DiceResult(rolls=[group], total=sum(group.rolls))
+            result = DiceResult(
+                rolls=[group],
+                total=sum(group.rolls),
+                parts=[f"{count}d{sides} {group.rolls}"],
+            )
             return result
         case Num(value):
-            result = DiceResult(rolls=[], total=value)
+            result = DiceResult(rolls=[], total=value, parts=[str(value)])
             return result
         case BinOp(op, left, right):
             left_nodes = evaluate(left)
             right_nodes = evaluate(right)
-            ops = [*left_nodes.ops, op, *right_nodes.ops]
+            parts = [*left_nodes.parts, op, *right_nodes.parts]
             if op == "+":
                 return DiceResult(
                     rolls=left_nodes.rolls + right_nodes.rolls,
                     total=left_nodes.total + right_nodes.total,
-                    ops=ops,
+                    parts=parts,
                 )
             if op == "-":
                 return DiceResult(
                     rolls=left_nodes.rolls + right_nodes.rolls,
                     total=left_nodes.total - right_nodes.total,
-                    ops=ops,
+                    parts=parts,
                 )
         case _:
             raise ValueError(f"unknown node: {node}")
