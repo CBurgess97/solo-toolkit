@@ -2,25 +2,21 @@ from solo_toolkit.dice import DiceResult
 from solo_toolkit.dice.nodes import BinOp, Dice, Node, Num
 
 
-class Writer:
-    def __init__(self, diceresult: DiceResult) -> None:
-        self.diceresult = diceresult
-        self.parts = []
-        self.rollgroups = iter(self.diceresult.rolls)
+def write(result: DiceResult, node: Node) -> str:
+    rollgroups = iter(result.rolls)
+    parts: list[str] = []
 
-    def _write(self, node: Node) -> str:
-        match node:
+    def _walk(n: Node):
+        match n:
             case Dice(count, sides):
-                rollgroup = next(self.rollgroups)
-                self.parts.append(f"{count}d{sides}: {rollgroup.rolls} ")
+                rg = next(rollgroups)
+                parts.append(f"{count}d{sides}: {rg.rolls}")
             case Num(value):
-                self.parts.append(f"{value} ")
+                parts.append(str(value))
             case BinOp(op, left, right):
-                self._write(left)
-                self.parts.append(f"{op} ")
-                self._write(right)
-        return "".join(self.parts)
+                _walk(left)
+                parts.append(op)
+                _walk(right)
 
-    def write(self, node: Node):
-        out = self._write(node)
-        return out + f"= {self.diceresult.total}"
+    _walk(node)
+    return " ".join(parts) + f" = {result.total}"

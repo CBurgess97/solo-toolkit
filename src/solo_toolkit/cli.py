@@ -11,5 +11,4 @@ app = typer.Typer()
 def roll(expression: str):
     nodes = parser.parse(expression)
     result = roller.evaluate(nodes)
-    w = writer.Writer(result)
-    print(w.write(nodes))
+    print(writer.write(result, nodes))
