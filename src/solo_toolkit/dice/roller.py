@@ -12,21 +12,17 @@ class ModifierResult:
     dropped: list[int]
 
 
-def _kh(rollgroup: RollGroup, n: int | None) -> ModifierResult:
-    rolls = rollgroup.rolls
+def _kh(rolls: list[int], n: int | None) -> ModifierResult:
     s = sorted(rolls, reverse=True)
     return ModifierResult(kept=s[:n], dropped=s[n:])
 
 
-def _kl(rollgroup: RollGroup, n: int | None) -> ModifierResult:
-    rolls = rollgroup.rolls
-    s = sorted(
-        rolls,
-    )
+def _kl(rolls: list[int], n: int | None) -> ModifierResult:
+    s = sorted(rolls)
     return ModifierResult(kept=s[:n], dropped=s[n:])
 
 
-_MODIFIERS: dict[str, Callable[[RollGroup, int | None], ModifierResult]] = {
+_MODIFIERS: dict[str, Callable[[list[int], int | None], ModifierResult]] = {
     "kh": _kh,
     "kl": _kl,
 }
@@ -42,7 +38,7 @@ def _apply_modifiers(group: RollGroup, modifiers: list[Modifier]) -> ModifierRes
         fn = _MODIFIERS.get(mod.kind)
         if fn is None:
             raise ValueError(f"unknown modifier: {mod.kind!r}")
-        result = fn(group, mod.arg)
+        result = fn(group.rolls, mod.arg)
         group.rolls = result.kept
         dropped.extend(result.dropped)
     return ModifierResult(kept=group.rolls, dropped=dropped)
