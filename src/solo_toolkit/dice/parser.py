@@ -1,12 +1,8 @@
 import re
 
+from solo_toolkit.dice import ParseError
 from solo_toolkit.dice.lexer import Token, TokenKind, tokenize
 from solo_toolkit.dice.nodes import BinOp, Dice, Modifier, Node, Num
-
-
-class ParseError(Exception):
-    pass
-
 
 _MODIFIER_RE = re.compile(r"([a-z!]+)(\d+)?")
 

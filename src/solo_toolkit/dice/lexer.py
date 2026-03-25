@@ -2,6 +2,8 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 
+from solo_toolkit.dice import ParseError
+
 
 class TokenKind(Enum):
     INT = "INT"
@@ -15,10 +17,6 @@ class TokenKind(Enum):
 class Token:
     kind: TokenKind
     value: str
-
-
-class ParseError(Exception):
-    pass
 
 
 _TOKENS = [

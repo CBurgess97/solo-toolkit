@@ -1,6 +1,10 @@
 from dataclasses import dataclass, field
 
 
+class ParseError(Exception):
+    pass
+
+
 @dataclass
 class RollGroup:
     count: int
