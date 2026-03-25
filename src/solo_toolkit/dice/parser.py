@@ -5,6 +5,7 @@ from solo_toolkit.dice.lexer import Token, TokenKind, tokenize
 from solo_toolkit.dice.nodes import BinOp, Dice, Modifier, Node, Num
 
 _MODIFIER_RE = re.compile(r"([a-z!]+)(\d+)?")
+_REQUIRES_ARG = {"kh", "kl", "dh", "dl"}
 
 
 class Parser:
@@ -42,6 +43,8 @@ class Parser:
             raise ParseError(f"invalid modifier: {token.value!r}")
         kind = match.group(1)
         arg = int(match.group(2)) if match.group(2) else None
+        if kind in _REQUIRES_ARG and arg is None:
+            raise ParseError(f"modifier '{kind}' requires a numeric argument")
         return Modifier(kind, arg)
 
     def _parse_term(self) -> Node:

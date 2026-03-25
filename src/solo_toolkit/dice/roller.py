@@ -70,4 +70,4 @@ def evaluate(node: Node) -> DiceResult:
                 return DiceResult(
                     rolls=rolls, total=left_nodes.total - right_nodes.total
                 )
-    return DiceResult([], 0)
+    raise ValueError(f"unexpected node type: {type(node)}")
