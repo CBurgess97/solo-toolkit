@@ -6,8 +6,8 @@ from enum import Enum
 class TokenKind(Enum):
     INT = "INT"
     D = "D"
-    PLUS = "+"
-    MINUS = "-"
+    PLUS = "PLUS"
+    MINUS = "MINUS"
 
 
 @dataclass
@@ -20,7 +20,13 @@ class ParseError(Exception):
     pass
 
 
-_PATTERN = re.compile(r"\s*(?:(\d+)|(d)|(\+)|(-))")
+_TOKENS = [
+    r"(?P<INT>\d+)",
+    r"(?P<D>d)",
+    r"(?P<PLUS>\+)",
+    r"(?P<MINUS>-)",
+]
+_PATTERN = re.compile(r"\s*(?:" + "|".join(_TOKENS) + ")")
 
 
 def tokenize(expression: str) -> list[Token]:
@@ -32,13 +38,6 @@ def tokenize(expression: str) -> list[Token]:
             raise ParseError(
                 f"unexpected character at position {pos}: {expression[pos:]!r}"
             )
-        if m.group(1):
-            tokens.append(Token(TokenKind.INT, m.group(1)))
-        elif m.group(2):
-            tokens.append(Token(TokenKind.D, "d"))
-        elif m.group(3):
-            tokens.append(Token(TokenKind.PLUS, "+"))
-        elif m.group(4):
-            tokens.append(Token(TokenKind.MINUS, "-"))
+        tokens.append(Token(TokenKind[m.lastgroup], m.group(m.lastgroup)))
         pos = m.end()
     return tokens
