@@ -52,29 +52,22 @@ def evaluate(node: Node) -> DiceResult:
                 mod_result = _apply_modifiers(group, modifiers)
                 group.dropped = mod_result.dropped
                 group.modifiers = [m.kind for m in modifiers]
-            result = DiceResult(
+            return DiceResult(
                 rolls=[group],
                 total=sum(group.rolls),
-                parts=[f"{count}d{sides} {group.rolls}"],
             )
-            return result
         case Num(value):
-            result = DiceResult(rolls=[], total=value, parts=[str(value)])
-            return result
+            return DiceResult(rolls=[], total=value)
         case BinOp(op, left, right):
             left_nodes = evaluate(left)
             right_nodes = evaluate(right)
-            parts = [*left_nodes.parts, op, *right_nodes.parts]
+            rolls = left_nodes.rolls + right_nodes.rolls
             if op == "+":
                 return DiceResult(
-                    rolls=left_nodes.rolls + right_nodes.rolls,
-                    total=left_nodes.total + right_nodes.total,
-                    parts=parts,
+                    rolls=rolls, total=left_nodes.total + right_nodes.total
                 )
             if op == "-":
                 return DiceResult(
-                    rolls=left_nodes.rolls + right_nodes.rolls,
-                    total=left_nodes.total - right_nodes.total,
-                    parts=parts,
+                    rolls=rolls, total=left_nodes.total - right_nodes.total
                 )
     return DiceResult([], 0)
