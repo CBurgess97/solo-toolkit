@@ -8,6 +8,7 @@ class TokenKind(Enum):
     D = "D"
     PLUS = "PLUS"
     MINUS = "MINUS"
+    MODIFIER = "MODIFIER"
 
 
 @dataclass
@@ -25,6 +26,7 @@ _TOKENS = [
     r"(?P<D>d)",
     r"(?P<PLUS>\+)",
     r"(?P<MINUS>-)",
+    r"(?P<MODIFIER>(?:kh|kl|dh|dl|ro?|!)\d*)",
 ]
 _PATTERN = re.compile(r"\s*(?:" + "|".join(_TOKENS) + ")")
 

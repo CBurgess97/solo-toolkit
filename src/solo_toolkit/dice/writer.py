@@ -8,9 +8,10 @@ def write(result: DiceResult, node: Node) -> str:
 
     def _walk(n: Node):
         match n:
-            case Dice(count, sides):
+            case Dice(count, sides, modifiers):
                 rg = next(rollgroups)
-                parts.append(f"{count}d{sides}: {rg.rolls}")
+                mods = [f"{a.kind}{a.arg}" for a in modifiers]
+                parts.append(f"{count}d{sides}{''.join(mods)}: {rg.rolls}")
             case Num(value):
                 parts.append(str(value))
             case BinOp(op, left, right):

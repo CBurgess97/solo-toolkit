@@ -6,6 +6,8 @@ class RollGroup:
     count: int
     sides: int
     rolls: list[int]
+    dropped: list[int] = field(default_factory=list)
+    modifiers: list[str] = field(default_factory=list)
 
 
 @dataclass

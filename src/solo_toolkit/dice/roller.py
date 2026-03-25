@@ -1,17 +1,61 @@
+from collections.abc import Callable
+from dataclasses import dataclass
 from random import randint
 
 from solo_toolkit.dice import DiceResult, RollGroup
-from solo_toolkit.dice.nodes import BinOp, Dice, Node, Num
+from solo_toolkit.dice.nodes import BinOp, Dice, Modifier, Node, Num
+
+
+@dataclass
+class ModifierResult:
+    kept: list[int]
+    dropped: list[int]
+
+
+def _kh(rollgroup: RollGroup, n: int | None) -> ModifierResult:
+    rolls = rollgroup.rolls
+    s = sorted(rolls, reverse=True)
+    return ModifierResult(kept=s[:n], dropped=s[n:])
+
+
+def _kl(rollgroup: RollGroup, n: int | None) -> ModifierResult:
+    rolls = rollgroup.rolls
+    s = sorted(
+        rolls,
+    )
+    return ModifierResult(kept=s[:n], dropped=s[n:])
+
+
+_MODIFIERS: dict[str, Callable[[RollGroup, int | None], ModifierResult]] = {
+    "kh": _kh,
+    "kl": _kl,
+}
 
 
 def _roll(count: int, sides: int) -> RollGroup:
     return RollGroup(count, sides, [randint(1, sides) for a in range(0, count)])
 
 
+def _apply_modifiers(group: RollGroup, modifiers: list[Modifier]) -> ModifierResult:
+    dropped: list[int] = []
+    for mod in modifiers:
+        fn = _MODIFIERS.get(mod.kind)
+        if fn is None:
+            raise ValueError(f"unknown modifier: {mod.kind!r}")
+        result = fn(group, mod.arg)
+        group.rolls = result.kept
+        dropped.extend(result.dropped)
+    return ModifierResult(kept=group.rolls, dropped=dropped)
+
+
 def evaluate(node: Node) -> DiceResult:
     match node:
-        case Dice(count, sides):
+        case Dice(count, sides, modifiers):
             group = _roll(count, sides)
+            if modifiers:
+                mod_result = _apply_modifiers(group, modifiers)
+                group.dropped = mod_result.dropped
+                group.modifiers = [m.kind for m in modifiers]
             result = DiceResult(
                 rolls=[group],
                 total=sum(group.rolls),
@@ -37,6 +81,4 @@ def evaluate(node: Node) -> DiceResult:
                     total=left_nodes.total - right_nodes.total,
                     parts=parts,
                 )
-        case _:
-            raise ValueError(f"unknown node: {node}")
     return DiceResult([], 0)

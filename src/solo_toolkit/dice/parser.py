@@ -1,9 +1,14 @@
+import re
+
 from solo_toolkit.dice.lexer import Token, TokenKind, tokenize
-from solo_toolkit.dice.nodes import BinOp, Dice, Node, Num
+from solo_toolkit.dice.nodes import BinOp, Dice, Modifier, Node, Num
 
 
 class ParseError(Exception):
     pass
+
+
+_MODIFIER_RE = re.compile(r"([a-z!]+)(\d+)?")
 
 
 class Parser:
@@ -35,6 +40,14 @@ class Parser:
             left = BinOp(op, left, right)
         return left
 
+    def _parse_modifier(self, token: Token) -> Modifier:
+        match = _MODIFIER_RE.fullmatch(token.value)
+        if not match:
+            raise ParseError(f"invalid modifier: {token.value!r}")
+        kind = match.group(1)
+        arg = int(match.group(2)) if match.group(2) else None
+        return Modifier(kind, arg)
+
     def _parse_term(self) -> Node:
         tok = self._expect(TokenKind.INT)
         n = int(tok.value)
@@ -44,7 +57,10 @@ class Parser:
             sides = int(sides_tok.value)
             if n < 1 or sides < 1:
                 raise ParseError(f"dice must be at least 1d1, got {n}d{sides}")
-            return Dice(n, sides)
+            modifiers = []
+            while (m := self._peek()) and m.kind == TokenKind.MODIFIER:
+                modifiers.append(self._parse_modifier(self._advance()))
+            return Dice(n, sides, modifiers)
         return Num(n)
 
 
