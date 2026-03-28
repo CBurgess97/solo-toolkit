@@ -10,7 +10,9 @@ def write(result: DiceResult, node: Node) -> str:
         match n:
             case Dice(count, sides, modifiers):
                 rg = next(rollgroups)
-                mods = [f"{a.kind}{a.arg}" for a in modifiers]
+                mods = [
+                    f"{a.kind}{a.arg if a.arg is not None else ''}" for a in modifiers
+                ]
                 parts.append(f"{count}d{sides}{''.join(mods)}: {rg.rolls}")
             case Num(value):
                 parts.append(str(value))

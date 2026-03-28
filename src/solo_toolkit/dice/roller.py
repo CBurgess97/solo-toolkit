@@ -12,19 +12,43 @@ class ModifierResult:
     dropped: list[int]
 
 
-def _kh(rolls: list[int], n: int | None) -> ModifierResult:
-    s = sorted(rolls, reverse=True)
+def _kh(group: RollGroup, n: int | None) -> ModifierResult:
+    s = sorted(group.rolls, reverse=True)
     return ModifierResult(kept=s[:n], dropped=s[n:])
 
 
-def _kl(rolls: list[int], n: int | None) -> ModifierResult:
-    s = sorted(rolls)
+def _kl(group: RollGroup, n: int | None) -> ModifierResult:
+    s = sorted(group.rolls)
     return ModifierResult(kept=s[:n], dropped=s[n:])
 
 
-_MODIFIERS: dict[str, Callable[[list[int], int | None], ModifierResult]] = {
+def _dh(group: RollGroup, n: int | None) -> ModifierResult:
+    s = sorted(group.rolls, reverse=True)
+    return ModifierResult(kept=s[n:], dropped=s[:n])
+
+
+def _dl(group: RollGroup, n: int | None) -> ModifierResult:
+    s = sorted(group.rolls)
+    return ModifierResult(kept=s[n:], dropped=s[:n])
+
+
+def _explode(group: RollGroup, n: int | None) -> ModifierResult:
+    threshold = n if n is not None else group.sides
+    kept = list(group.rolls)
+    to_reroll = [r for r in kept if r >= threshold]
+    while to_reroll:
+        new_rolls = [randint(1, group.sides) for _ in to_reroll]
+        kept.extend(new_rolls)
+        to_reroll = [r for r in new_rolls if r >= threshold]
+    return ModifierResult(kept=kept, dropped=[])
+
+
+_MODIFIERS: dict[str, Callable[[RollGroup, int | None], ModifierResult]] = {
     "kh": _kh,
     "kl": _kl,
+    "dl": _dl,
+    "dh": _dh,
+    "!": _explode,
 }
 
 
@@ -38,7 +62,7 @@ def _apply_modifiers(group: RollGroup, modifiers: list[Modifier]) -> ModifierRes
         fn = _MODIFIERS.get(mod.kind)
         if fn is None:
             raise ValueError(f"unknown modifier: {mod.kind!r}")
-        result = fn(group.rolls, mod.arg)
+        result = fn(group, mod.arg)
         group.rolls = result.kept
         dropped.extend(result.dropped)
     return ModifierResult(kept=group.rolls, dropped=dropped)
