@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-solo-toolkit = "solo_toolkit.cli:app"
+roll = "solo_toolkit.cli:app"
 
 [build-system]
 requires = ["hatchling"]
